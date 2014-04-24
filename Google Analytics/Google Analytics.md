@@ -202,7 +202,8 @@
 ## Universal Analytics Enabled
 
 - **200,000 hits per user per day**
-- **500 hits per session not including ecommerce (item and event hit types)**
+- **500 hits per session**
+  (except item and transaction hit types)
 
 ###### This applies to analytics.js, Android/iOS SDK and the Measurement Protocol.
 
