@@ -1,4 +1,16 @@
-# Indices APIs
+# Elasticsearch Reference
+
+## Indices APIs
+
+---
+
+# Postman Shared Collection
+
+<http://goo.gl/Px9jf2>
+
+---
+
+# Indices
 
 ---
 
@@ -9,8 +21,8 @@ $ curl -XPUT localhost:9200/twitter/
 
 $ curl -XPUT localhost:9200/twitter/ -d '
 index :
-    number_of_shards : 3
-    number_of_replicas : 2
+  number_of_shards : 3
+  number_of_replicas : 2
 '
 ```
 
@@ -69,6 +81,56 @@ $ curl -XPOST localhost:9200/twitter/_close
 
 $ curl -XPOST localhost:9200/twitter/_open
 ```
+
+---
+
+# Update Index Settings
+
+```bash
+$ curl -XPUT localhost:9200/twitter/_settings -d '
+{
+  "index" : {
+    "number_of_replicas" : 4
+  }
+}
+'
+```
+
+---
+
+# Get Index Settings
+
+```bash
+$ curl -XGET localhost:9200/twitter/_settings
+```
+
+Supports multiple indices.
+
+```bash
+$ curl -XGET localhost:9200/twitter,kimchy/_settings
+
+$ curl -XGET localhost:9200/_all/_settings
+
+$ curl -XGET localhost:9200/2013-*/_settings
+```
+
+---
+
+Filter settings with `prefix` and `name` options.
+
+```bash
+$ curl -XGET localhost:9200/twitter/_settings?prefix=index.
+
+$ curl -XGET localhost:9200/_all/_settings?prefix=index.routing.allocation.
+
+$ curl -XGET localhost:9200/2013-*/_settings?name=index.merge.*
+
+$ curl -XGET localhost:9200/2013-*/_settings/index.merge.*
+```
+
+---
+
+# Mappings
 
 ---
 
@@ -151,25 +213,15 @@ $ curl -XHEAD localhost:9200/twitter/tweet
 # Delete Mappings
 
 ```bash
+$ curl -XDELETE localhost:9200/twitter/tweet/_mapping
 $ curl -XDELETE localhost:9200/twitter/tweet
-$ curl -XDELETE localhost:9200/twitter/tweet/_mapping
 ```
 
-Deleting Mapping == Deleting Types ?!
+# [fit] Deleting Mapping == Deleting Types
 
-```bash
-$ curl -XPUT localhost:9200/twitter/tweet/1 -d '
-{
-  "user" : "kimchy",
-  "post_date" : "2009-11-15T14:12:12",
-  "message" : "trying out Elasticsearch"
-}
-'
+---
 
-$ curl -XDELETE localhost:9200/twitter/tweet/_mapping
-
-$ curl -XGET localhost:9200/twitter/tweet/1
-```
+# Aliases
 
 ---
 
@@ -190,6 +242,12 @@ $ curl -XPOST localhost:9200/_aliases -d '
 ```
 
 ---
+
+## Get Aliases
+
+```bash
+$ curl -XGET localhost:9200/_aliases
+```
 
 ## Remove Aliases
 
@@ -294,49 +352,7 @@ $ curl -XPOST localhost:9200/_aliases -d '
 
 ---
 
-# Update Index Settings
-
-```bash
-$ curl -XPUT localhost:9200/twitter/_settings -d '
-{
-  "index" : {
-    "number_of_replicas" : 4
-  }
-}
-'
-```
-
----
-
-# Get Index Settings
-
-```bash
-$ curl -XGET localhost:9200/twitter/_settings
-```
-
-Supports multiple indices.
-
-```bash
-$ curl -XGET localhost:9200/twitter,kimchy/_settings
-
-$ curl -XGET localhost:9200/_all/_settings
-
-$ curl -XGET localhost:9200/2013-*/_settings
-```
-
----
-
-Filter settings with `prefix` and `name` options.
-
-```bash
-$ curl -XGET localhost:9200/twitter/_settings?prefix=index.
-
-$ curl -XGET localhost:9200/_all/_settings?prefix=index.routing.allocation.
-
-$ curl -XGET localhost:9200/2013-*/_settings?name=index.merge.*
-
-$ curl -XGET localhost:9200/2013-*/_settings/index.merge.*
-```
+# Analyze
 
 ---
 
@@ -359,6 +375,10 @@ $ curl -XPOST 'localhost:9200/_analyze?tokenizer=keyword&token_filters=lowercase
 ```bash
 $ curl -XGET localhost:9200/twitter/_analyze?text=this+is+a+test
 ```
+
+---
+
+# Templates
 
 ---
 
@@ -437,31 +457,31 @@ $ curl -XGET localhost:9200/_template/
 ```bash
 $ curl -XPUT localhost:9200/_template/template_1 -d '
 {
-    "template" : "*",
-    "order" : 0,
-    "settings" : {
-        "number_of_shards" : 1
-    },
-    "mappings" : {
-        "type1" : {
-            "_source" : { "enabled" : false }
-        }
+  "template" : "*",
+  "order" : 0,
+  "settings" : {
+    "number_of_shards" : 1
+  },
+  "mappings" : {
+    "type1" : {
+      "_source" : { "enabled" : false }
     }
+  }
 }
 '
 
 $ curl -XPUT localhost:9200/_template/template_2 -d '
 {
-    "template" : "te*",
-    "order" : 1,
-    "settings" : {
-        "number_of_shards" : 1
-    },
-    "mappings" : {
-        "type1" : {
-            "_source" : { "enabled" : true }
-        }
+  "template" : "te*",
+  "order" : 1,
+  "settings" : {
+    "number_of_shards" : 1
+  },
+  "mappings" : {
+    "type1" : {
+      "_source" : { "enabled" : true }
     }
+  }
 }
 '
 ```
@@ -472,6 +492,10 @@ $ curl -XPUT localhost:9200/_template/template_2 -d '
 
 Index templates can also be placed
 within **`config/templates`** directory.
+
+---
+
+# Warmers
 
 ---
 
@@ -493,10 +517,14 @@ $ curl -XPUT localhost:9200/test -d '
       "types" : [],
       "source" : {
         "query" : {
-          ...
+          "match_all" : {}
         },
         "facets" : {
-          ...
+          "facet_1" : {
+            "terms" : {
+              "field" : "field"
+            }
+          }
         }
       }
     }
@@ -544,6 +572,10 @@ $ curl -XGET localhost:9200/test/_warmer/
 
 ---
 
+# More GETs
+
+---
+
 # Status
 
 The indices status API allows to get a **comprehensive status information** of one or more indices.
@@ -570,7 +602,7 @@ $ curl -XGET localhost:9200/_stats
 
 # Segments
 
-Provide **low level segments information** that a Lucene index (shard level) is built with.
+Provides **low level segments information** that a Lucene index (shard level) is built with.
 
 ```bash
 $ curl -XGET localhost:9200/twitter/_segments
@@ -594,7 +626,13 @@ $ curl -XGET localhost:9200/twitter/_recovery?detailed=true
 
 ---
 
+# More POSTs
+
+---
+
 # Clear Cache
+
+The clear cache API allows to **clear either all caches or specific caches** associated with one ore more indices.
 
 ```bash
 $ curl -XPOST localhost:9200/twitter/_cache/clear
@@ -602,17 +640,25 @@ $ curl -XPOST localhost:9200/twitter,kimchy/_cache/clear
 $ curl -XPOST localhost:9200/_cache/clear
 ```
 
-## Cache Types: `filter`, `field_data`, `id_cache`
+---
+
+## Cache Types
+
+- **`filter`**
+- **`field_data`**
+- **`id_cache`**
 
 ```bash
 $ curl -XPOST localhost:9200/twitter/_cache/clear?filter=true
 ```
 
-The `filter` cache will be cleared within 60 seconds.
+cf. The `filter` cache will be cleared within 60 seconds.
 
 ---
 
 # Flush
+
+The **flush** process of an index basically **frees memory** from the index by flushing data to the _index storage_ and clearing the internal _transaction log_.
 
 ```bash
 $ curl -XPOST localhost:9200/twitter/_flush
@@ -624,6 +670,8 @@ $ curl -XPOST localhost:9200/_flush
 
 # Refresh
 
+The refresh API allows to explicitly **refresh** one or more index, _making all operations performed_ since the last refresh available for search.
+
 ```bash
 $ curl -XPOST localhost:9200/twitter/_refresh
 $ curl -XPOST localhost:9200/twitter,kimchy/_refresh
@@ -634,6 +682,10 @@ $ curl -XPOST localhost:9200/_refresh
 
 # Optimize
 
+The **optimize** process basically optimizes the index _for faster search_ operations.
+
+The optimize operation allows to _reduce the number of segments_ by merging them.
+
 ```bash
 $ curl -XPOST localhost:9200/twitter/_optimize
 $ curl -XPOST localhost:9200/twitter,kimchy/_optimize
@@ -642,4 +694,6 @@ $ curl -XPOST localhost:9200/_optimize
 
 ---
 
-# Thanks.
+# Thank You!
+
+## by Daniel Ku (<http://kjunine.net>)
